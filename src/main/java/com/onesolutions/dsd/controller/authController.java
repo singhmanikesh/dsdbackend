@@ -1,6 +1,7 @@
 package com.onesolutions.dsd.controller;
 
 
+import com.onesolutions.dsd.dto.AuthDto;
 import com.onesolutions.dsd.dto.UserRequestDTO;
 import com.onesolutions.dsd.dto.UserResponseDTO;
 import com.onesolutions.dsd.service.userService;
@@ -27,6 +28,12 @@ public class authController {
     public UserResponseDTO register(@RequestBody UserRequestDTO userRequest){
         UserResponseDTO resp =   userService.registerUser(userRequest);
         return resp ;
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody AuthDto userRequest){
+        // Implement login logic here
+        return "Login successful!";
     }
 
 }

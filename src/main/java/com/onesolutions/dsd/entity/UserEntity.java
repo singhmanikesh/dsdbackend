@@ -34,7 +34,7 @@ public class UserEntity {
     private LocalDateTime updatedAt;
     private String avatarUrl;
     @Enumerated(EnumType.STRING)
-    private Roles roles;
+    private Roles roles = Roles.USER;
     private Integer hp;
 
     @PrePersist
@@ -43,5 +43,7 @@ public class UserEntity {
             hp = 0; // Default HP value
         }
     }
+
+
 
 }

@@ -25,6 +25,6 @@ public class UserRequestDTO {
 
         private String avatarurl;
 
-        private Roles role;
+//        private Roles role;
 
 }

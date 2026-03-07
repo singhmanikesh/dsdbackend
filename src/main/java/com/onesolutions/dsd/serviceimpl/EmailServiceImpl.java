@@ -24,7 +24,7 @@ public class EmailServiceImpl implements EmailService {
 
         try {
 
-            String fromEmail = "manikesh.amcec@gmail.com";
+            String fromEmail = "riteshkusingh27@gmail.com";
 
             // Create Thymeleaf context
             Context context = new Context();

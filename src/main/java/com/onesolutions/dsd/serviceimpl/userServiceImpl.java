@@ -28,6 +28,17 @@ public class userServiceImpl implements userService {
         return toDto(newprofile);
     }
 
+    @Override
+    public void addHp(Long userId, Integer hp) {
+
+        UserEntity user = profileRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setHp(user.getHp() + hp);
+
+        profileRepo.save(user);
+    }
+
     public UserEntity toEntity(UserRequestDTO userRequest){
         UserEntity entity = new UserEntity();
         entity.setEmail(userRequest.getEmail());

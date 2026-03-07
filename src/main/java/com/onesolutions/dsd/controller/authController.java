@@ -1,6 +1,7 @@
 package com.onesolutions.dsd.controller;
 
 
+import com.onesolutions.dsd.dto.AddHpRequestDTO;
 import com.onesolutions.dsd.dto.UserRequestDTO;
 import com.onesolutions.dsd.dto.UserResponseDTO;
 import com.onesolutions.dsd.service.userService;
@@ -29,4 +30,14 @@ public class authController {
         return resp ;
     }
 
+
+    @PatchMapping("/users/{id}/hp")
+    public String addHpToUser(
+            @PathVariable Long id,
+            @RequestBody AddHpRequestDTO request) {
+
+        userService.addHp(id, request.getHp());
+
+        return "HP added successfully";
+    }
 }

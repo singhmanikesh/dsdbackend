@@ -7,5 +7,7 @@ public interface userService {
 
     UserResponseDTO registerUser(UserRequestDTO userRequest);
 
+    void addHp(Long userId, Integer hp);
+
 
 }

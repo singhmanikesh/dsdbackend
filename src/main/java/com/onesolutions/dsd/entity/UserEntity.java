@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.Id;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +25,9 @@ public class User {
     @Column(unique = true)
     private String email;
     private String password;
-    private Long gamerName;
-    private Long steamID;
-    private Long riotID;
+    private String gamerName;
+    private String steamid;
+    private String riotid;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

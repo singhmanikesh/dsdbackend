@@ -17,13 +17,13 @@ public class UserRequestDTO {
         @NotBlank
         private String password;
 
-        private String gamerName;
+        private String gamername;
 
-        private String steamId;
+        private String steamid;
 
-        private String riotId;
+        private String riotid;
 
-        private String avatarUrl;
+        private String avatarurl;
 
         private Roles role;
 

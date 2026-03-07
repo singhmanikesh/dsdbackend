@@ -4,6 +4,7 @@ import com.onesolutions.dsd.dto.UserRequestDTO;
 import com.onesolutions.dsd.dto.UserResponseDTO;
 import com.onesolutions.dsd.entity.UserEntity;
 import com.onesolutions.dsd.repository.profileRepo;
+import com.onesolutions.dsd.service.EmailService;
 import com.onesolutions.dsd.service.userService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class userServiceImpl implements userService {
 
     private   final profileRepo profileRepo;
+    private final EmailService emailService;
 
 
 
@@ -22,6 +24,7 @@ public class userServiceImpl implements userService {
     public UserResponseDTO registerUser(UserRequestDTO userRequest) {
         UserEntity newprofile = toEntity(userRequest);
         newprofile = profileRepo.save(newprofile);
+        emailService.sendEmail(newprofile.getEmail(),"Welcome to DSD","Your account has been created successfully! Your gamer name is: " + newprofile.getGamerName());
         return toDto(newprofile);
     }
 

@@ -105,7 +105,9 @@ public class userServiceImpl implements userService {
                     "user" , getpublicProfile(authdto.getEmail())
             );
         } catch (Exception e){
-            throw new RuntimeException("Invalid email or password");
+            e.printStackTrace();
+
+            throw new RuntimeException("Invalid email or Password");
         }
     }
 

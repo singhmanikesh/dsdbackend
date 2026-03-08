@@ -1,9 +1,6 @@
 package com.onesolutions.dsd.serviceimpl;
 
-import com.onesolutions.dsd.dto.CreateTeamRequestDTO;
-import com.onesolutions.dsd.dto.TournamentRequestDTO;
-import com.onesolutions.dsd.dto.TournamentResponseDTO;
-import com.onesolutions.dsd.dto.UserJoinedResponseDTO;
+import com.onesolutions.dsd.dto.*;
 import com.onesolutions.dsd.entity.Team;
 import com.onesolutions.dsd.entity.TeamMember;
 import com.onesolutions.dsd.entity.Tournament;
@@ -37,6 +34,32 @@ public class TournamentServiceImpl implements TournamentService {
         return toDto(tournament);
     }
 
+
+    @Override
+    public List<TeamResponseDTO> getTeamsByTournament(Long tournamentId) {
+
+        List<Team> teams = teamRepository.findByTournamentId(tournamentId);
+
+        return teams.stream().map(team -> {
+
+            List<TeamMember> members = teamMemberRepository.findByTeamTeamId(team.getTeamId());
+
+            List<String> players = members.stream()
+                    .map(member -> {
+                        return profileRepo.findById(member.getUserId())
+                                .map(user -> user.getGamerName())
+                                .orElse("Unknown");
+                    })
+                    .toList();
+
+            return TeamResponseDTO.builder()
+                    .teamName(team.getTeamName())
+                    .teamLeader(team.getTeamLeaderGamerName())
+                    .players(players)
+                    .build();
+
+        }).toList();
+    }
 
     @Override
     public void createTeam(CreateTeamRequestDTO request) {

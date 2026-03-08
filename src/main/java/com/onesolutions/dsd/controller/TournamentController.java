@@ -29,6 +29,13 @@ public class TournamentController {
         return "Team created successfully";
     }
 
+    @GetMapping("/{id}/teams")
+    public List<TeamResponseDTO> getTeamsByTournament(@PathVariable Long id){
+
+        return tournamentService.getTeamsByTournament(id);
+
+    }
+
     @GetMapping
     public List<TournamentResponseDTO> getAllTournaments() {
 

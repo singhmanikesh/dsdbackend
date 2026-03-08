@@ -1,9 +1,6 @@
 package com.onesolutions.dsd.controller;
 
-import com.onesolutions.dsd.dto.JoinTournamentRequestDTO;
-import com.onesolutions.dsd.dto.TournamentRequestDTO;
-import com.onesolutions.dsd.dto.TournamentResponseDTO;
-import com.onesolutions.dsd.dto.UserJoinedResponseDTO;
+import com.onesolutions.dsd.dto.*;
 import com.onesolutions.dsd.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +19,14 @@ public class TournamentController {
             @RequestBody TournamentRequestDTO request) {
 
         return tournamentService.createTournament(request);
+    }
+
+    @PostMapping("/create-team")
+    public String createTeam(@RequestBody CreateTeamRequestDTO request){
+
+        tournamentService.createTeam(request);
+
+        return "Team created successfully";
     }
 
     @GetMapping

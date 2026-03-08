@@ -1,10 +1,15 @@
 package com.onesolutions.dsd.serviceimpl;
 
+import com.onesolutions.dsd.dto.CreateTeamRequestDTO;
 import com.onesolutions.dsd.dto.TournamentRequestDTO;
 import com.onesolutions.dsd.dto.TournamentResponseDTO;
 import com.onesolutions.dsd.dto.UserJoinedResponseDTO;
+import com.onesolutions.dsd.entity.Team;
+import com.onesolutions.dsd.entity.TeamMember;
 import com.onesolutions.dsd.entity.Tournament;
 import com.onesolutions.dsd.entity.UserEntity;
+import com.onesolutions.dsd.repository.TeamMemberRepository;
+import com.onesolutions.dsd.repository.TeamRepository;
 import com.onesolutions.dsd.repository.TournamentRepository;
 import com.onesolutions.dsd.repository.profileRepo;
 import com.onesolutions.dsd.service.TournamentService;
@@ -20,6 +25,8 @@ public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
     private   final profileRepo profileRepo;
+    private final TeamRepository teamRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Override
     public TournamentResponseDTO createTournament(TournamentRequestDTO request) {
@@ -29,6 +36,33 @@ public class TournamentServiceImpl implements TournamentService {
 
         return toDto(tournament);
     }
+
+
+    @Override
+    public void createTeam(CreateTeamRequestDTO request) {
+
+        Team team = Team.builder()
+                .teamName(request.getTeamName())
+                .tournamentId(request.getTournamentId())
+                .teamLeaderGamerName(request.getTeamLeaderGamerName())
+                .build();
+
+        teamRepository.save(team);
+
+        for(String gamerName : request.getGamerNames()){
+
+            UserEntity user = profileRepo.findByGamerName(gamerName)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + gamerName));
+
+            TeamMember member = TeamMember.builder()
+                    .userId(user.getId())
+                    .team(team)
+                    .build();
+
+            teamMemberRepository.save(member);
+        }
+    }
+
 
     @Override
     public void joinTournament(Long tournamentId, Long userId) {
@@ -131,3 +165,5 @@ public class TournamentServiceImpl implements TournamentService {
                 .build();
     }
 }
+
+

@@ -2,7 +2,6 @@ package com.onesolutions.dsd.serviceimpl;
 
 import com.onesolutions.dsd.Utility.Jwtutil;
 import com.onesolutions.dsd.dto.AuthDto;
-import com.onesolutions.dsd.dto.ProfileDTO;
 import com.onesolutions.dsd.dto.UserRequestDTO;
 import com.onesolutions.dsd.dto.UserResponseDTO;
 import com.onesolutions.dsd.entity.UserEntity;
@@ -18,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,6 +35,10 @@ public class userServiceImpl implements userService {
 
     @Override
     public UserResponseDTO registerUser(UserRequestDTO userRequest) {
+
+        if (profileRepo.findByEmail(userRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("Account already registered with this email");
+        }
         UserEntity newprofile = toEntity(userRequest);
         newprofile.setPassword(passwordEncoder.encode(newprofile.getPassword()));
         newprofile = profileRepo.save(newprofile);
@@ -110,5 +114,101 @@ public class userServiceImpl implements userService {
             throw new RuntimeException("Invalid email or Password");
         }
     }
+
+    @Override
+    public void forgotPassword(String email) {
+
+        UserEntity user = profileRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with this email"));
+
+        /// 1 minute cooldown before requesting another OTP
+        if(user.getOtpExpiry() != null && user.getOtpExpiry().isAfter(LocalDateTime.now().minusMinutes(1))){
+            throw new RuntimeException("Please wait before requesting another OTP");
+        }
+
+        // generate 4 digit OTP
+        String otp = String.valueOf((int)(Math.random() * 9000) + 1000);
+
+        // set OTP fields
+        user.setResetOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(10));
+        user.setOtpVerified(false);
+
+        // clear previous reset tokens if any
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+
+        profileRepo.save(user);
+
+        // send email
+        emailService.sendEmail(
+                user.getEmail(),
+                "Password Reset OTP",
+                "Your OTP for password reset is: " + otp + ". It will expire in 10 minutes."
+        );
+    }
+
+    @Override
+    public String verifyOtp(String email, String otp) {
+
+        UserEntity user = profileRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with this email"));
+
+        if(user.getResetOtp() == null){
+            throw new RuntimeException("OTP not requested");
+        }
+
+        if(!user.getResetOtp().equals(otp)){
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        if(user.getOtpExpiry().isBefore(LocalDateTime.now())){
+            throw new RuntimeException("OTP expired");
+        }
+
+        user.setOtpVerified(true);
+
+        String resetToken = UUID.randomUUID().toString();
+
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+
+        profileRepo.save(user);
+
+        return resetToken;
+    }
+
+    @Override
+    public void resetPassword(String token, String newPassword) {
+
+    }
+
+
+    @Override
+    public void resetPassword(String token, String newPassword, String confirmPassword) {
+        UserEntity user = profileRepo.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset token expired");
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // clear reset data
+        user.setResetOtp(null);
+        user.setOtpExpiry(null);
+        user.setOtpVerified(false);
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+
+        profileRepo.save(user);
+
+    }
+
 
 }

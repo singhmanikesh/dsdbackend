@@ -8,5 +8,6 @@ import java.util.Optional;
 @Repository
 public interface profileRepo extends JpaRepository<UserEntity,Long> {
     Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByResetToken(String resetToken);
 
 }

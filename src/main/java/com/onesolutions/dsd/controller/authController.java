@@ -1,9 +1,8 @@
 package com.onesolutions.dsd.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onesolutions.dsd.dto.*;
 import com.onesolutions.dsd.service.userService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,9 +38,9 @@ public class authController {
             UserRequestDTO userRequest = objectMapper.readValue(userRequestJson, UserRequestDTO.class);
 
             // Set the avatar file separately
-            userRequest.setAvatar(avatar);
 
-            userService.registerUser(userRequest);
+
+            userService.registerUser(userRequest, avatar);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(Map.of("message", "Registered successfully"));

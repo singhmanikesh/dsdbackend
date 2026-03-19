@@ -46,7 +46,7 @@ public class userServiceImpl implements userService {
 
 
     @Override
-    public UserResponseDTO registerUser(UserRequestDTO userRequest) {
+    public UserResponseDTO registerUser(UserRequestDTO userRequest, MultipartFile avatar) {
         log.info("Starting user registration for email: {}", userRequest.getEmail());
 
         if (profileRepo.findByEmail(userRequest.getEmail()).isPresent()) {
@@ -57,26 +57,26 @@ public class userServiceImpl implements userService {
         UserEntity newprofile = toEntity(userRequest);
         newprofile.setPassword(passwordEncoder.encode(newprofile.getPassword()));
 
-        if (userRequest.getAvatar() != null && !userRequest.getAvatar().isEmpty()) {
+        if (avatar != null && !avatar.isEmpty()) {
             try {
                 log.info("Avatar file detected. Validating and uploading...");
 
                 // Validate file type
-                String contentType = userRequest.getAvatar().getContentType();
+                String contentType = avatar.getContentType();
                 if (contentType == null || !contentType.startsWith("image/")) {
                     log.warn("Invalid file type for avatar: {}", contentType);
                     throw new RuntimeException("Only image files are allowed for avatar");
                 }
 
                 // Validate file size (5MB limit)
-                long fileSizeInBytes = userRequest.getAvatar().getSize();
+                long fileSizeInBytes = avatar.getSize();
                 long maxFileSize = 5 * 1024 * 1024; // 5MB
                 if (fileSizeInBytes > maxFileSize) {
                     log.warn("Avatar file size exceeds limit: {} bytes", fileSizeInBytes);
                     throw new RuntimeException("Avatar file size must not exceed 5MB");
                 }
 
-                String imageUrl = uploadToR2(userRequest.getAvatar());
+                String imageUrl = uploadToR2(avatar);
                 newprofile.setAvatarUrl(imageUrl);
                 log.info("Avatar uploaded successfully: {}", imageUrl);
 

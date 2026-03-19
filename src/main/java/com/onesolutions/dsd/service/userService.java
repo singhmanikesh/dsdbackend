@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface userService {
 
-    UserResponseDTO registerUser(UserRequestDTO userRequest);
+    UserResponseDTO registerUser(UserRequestDTO userRequest, MultipartFile avatar);
 
     Map<String, Object> authenticateAndgenerateToken(AuthDto authdto);
 

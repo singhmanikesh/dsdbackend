@@ -1,9 +1,10 @@
 package com.onesolutions.dsd.dto;
 
-import com.onesolutions.dsd.entity.Roles;
+import jakarta.mail.Multipart;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class UserRequestDTO {
@@ -23,7 +24,7 @@ public class UserRequestDTO {
 
         private String riotid;
 
-        private String avatarurl;
+        private MultipartFile avatar;
 
 //        private Roles role;
 

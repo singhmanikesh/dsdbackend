@@ -2,10 +2,12 @@ package com.onesolutions.dsd.controller;
 
 import com.onesolutions.dsd.dto.*;
 import com.onesolutions.dsd.service.userService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -13,9 +15,11 @@ import java.util.Map;
 public class authController {
 
     private final userService userService;
+    private final ObjectMapper objectMapper;
 
-    public authController(userService userService) {
+    public authController(userService userService, ObjectMapper objectMapper) {
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/hello")
@@ -26,16 +30,23 @@ public class authController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> register(@RequestBody UserRequestDTO userRequest) {
+    public ResponseEntity<?> register(
+            @RequestPart("userRequest") String userRequestJson,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
 
         try {
+            // Convert JSON string to UserRequestDTO using ObjectMapper
+            UserRequestDTO userRequest = objectMapper.readValue(userRequestJson, UserRequestDTO.class);
+
+            // Set the avatar file separately
+            userRequest.setAvatar(avatar);
 
             userService.registerUser(userRequest);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(Map.of("message", "Registered successfully"));
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
@@ -110,14 +121,15 @@ public class authController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
     @PostMapping("/reset-password")
-    public ResponseEntity<Map<String,Object>> resetPassword(@RequestBody ResetPasswordRequestDTO request){
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
 
-        try{
+        try {
 
-            if(!request.getNewPassword().equals(request.getConfirmPassword())){
+            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("error","Passwords do not match"));
+                        .body(Map.of("error", "Passwords do not match"));
             }
 
             userService.resetPassword(
@@ -127,14 +139,14 @@ public class authController {
             );
 
             return ResponseEntity.ok(
-                    Map.of("message","Password reset successfully")
+                    Map.of("message", "Password reset successfully")
             );
 
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
 
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error",e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 }

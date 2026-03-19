@@ -34,7 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain sfc(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors(Customizer.withDefaults())
+        httpSecurity.cors(Customizer.withDefaults())   // if not able preflight will be blocked
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/status","/health","/activate","/register","/login","/refresh","/forget-password","/verify-otp","/reset-password").permitAll()
@@ -54,7 +54,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:8080")); // Use your frontend's actual origin
+        config.setAllowedOriginPatterns(List.of("http://localhost:8080","http://localhost:5173")); // Use your frontend's actual origin
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -64,7 +64,7 @@ public class SecurityConfig {
         return source;
     }
 
-    // authenticator manager
+    // authenticator manager called by the login userauthenication service 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

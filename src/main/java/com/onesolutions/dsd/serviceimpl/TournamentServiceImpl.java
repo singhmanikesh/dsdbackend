@@ -5,13 +5,21 @@ import com.onesolutions.dsd.entity.Team;
 import com.onesolutions.dsd.entity.TeamMember;
 import com.onesolutions.dsd.entity.Tournament;
 import com.onesolutions.dsd.entity.UserEntity;
+import com.onesolutions.dsd.exception.ResourceNotFoundException;
+import com.onesolutions.dsd.exception.TournamentExpiredException;
+import com.onesolutions.dsd.exception.UserAlreadyJoinedException;
 import com.onesolutions.dsd.repository.TeamMemberRepository;
 import com.onesolutions.dsd.repository.TeamRepository;
 import com.onesolutions.dsd.repository.TournamentRepository;
 import com.onesolutions.dsd.repository.profileRepo;
 import com.onesolutions.dsd.service.TournamentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -118,30 +126,80 @@ public class TournamentServiceImpl implements TournamentService {
     public void joinTournament(Long tournamentId, Long userId) {
 
         Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found with ID: " + tournamentId));
 
         UserEntity user = profileRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         // Check if tournament expired
         if (tournament.getExpired()) {
-            throw new RuntimeException("Tournament already expired");
+            throw new TournamentExpiredException("This tournament has already expired and is no longer accepting new members");
         }
 
         // Check duplicate join by id to avoid equals/hashCode dependency.
         boolean alreadyJoined = tournament.getUsersJoined().stream()
                 .anyMatch(joinedUser -> joinedUser.getId().equals(user.getId()));
         if (alreadyJoined) {
-            throw new RuntimeException("User already joined");
+            throw new UserAlreadyJoinedException("User with email '" + user.getEmail() + "' has already joined this tournament");
         }
 
-        // Add user
+        // Add user to tournament (owning side)
         tournament.getUsersJoined().add(user);
-
+        
         // Update count
         tournament.setTotalJoined(tournament.getTotalJoined() + 1);
 
+        // Save tournament (this updates the join table)
         tournamentRepository.save(tournament);
+        
+        // Refresh user to sync the bidirectional relationship (mapped side)
+        profileRepo.save(user);
+    }
+
+    @Override
+    public JoinTournamentResponseDTO joinTournamentWithResponse(Long tournamentId, Long userId) {
+
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found with ID: " + tournamentId));
+
+        UserEntity user = profileRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        // Check if tournament expired
+        if (tournament.getExpired()) {
+            throw new TournamentExpiredException("This tournament has already expired and is no longer accepting new members");
+        }
+
+        // Check duplicate join by id to avoid equals/hashCode dependency.
+        boolean alreadyJoined = tournament.getUsersJoined().stream()
+                .anyMatch(joinedUser -> joinedUser.getId().equals(user.getId()));
+        if (alreadyJoined) {
+            throw new UserAlreadyJoinedException("User with email '" + user.getEmail() + "' has already joined this tournament");
+        }
+
+        // Add user to tournament (owning side)
+        tournament.getUsersJoined().add(user);
+        
+        // Update count
+        tournament.setTotalJoined(tournament.getTotalJoined() + 1);
+
+        // Save tournament (this updates the join table)
+        tournamentRepository.save(tournament);
+        
+        // Refresh user to sync the bidirectional relationship (mapped side)
+        profileRepo.save(user);
+
+        // Return detailed response
+        return JoinTournamentResponseDTO.builder()
+                .tournamentId(tournament.getTournamentId())
+                .tournamentName(tournament.getTournamentName())
+                .userId(user.getId())
+                .userEmail(user.getEmail())
+                .gamerName(user.getGamerName())
+                .message("User joined tournament successfully")
+                .joinedAt(java.time.LocalDateTime.now())
+                .totalJoinedNow(tournament.getTotalJoined())
+                .build();
     }
 
     @Override
@@ -171,6 +229,34 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
+    public PaginatedTournamentResponseDTO getAllTournamentsPaginated(Pageable pageable) {
+
+        // Create pageable with descending sort by tournamentCreated (latest first)
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "tournamentCreated")
+        );
+
+        Page<Tournament> tournaments = tournamentRepository.findAll(sortedPageable);
+
+        List<TournamentResponseDTO> content = tournaments.getContent()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return PaginatedTournamentResponseDTO.builder()
+                .content(content)
+                .pageNumber(tournaments.getNumber())
+                .pageSize(tournaments.getSize())
+                .totalElements(tournaments.getTotalElements())
+                .totalPages(tournaments.getTotalPages())
+                .isFirst(tournaments.isFirst())
+                .isLast(tournaments.isLast())
+                .build();
+    }
+
+    @Override
     public TournamentResponseDTO getTournamentById(Long id) {
 
         Tournament tournament = tournamentRepository.findById(id)
@@ -186,6 +272,31 @@ public class TournamentServiceImpl implements TournamentService {
                 .orElseThrow(() -> new RuntimeException("Tournament not found"));
 
         tournamentRepository.delete(tournament);
+    }
+
+    @Override
+    @Transactional
+    public List<UserTournamentDTO> getUserTournaments(Long userId) {
+
+        UserEntity user = profileRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.getTournamentsJoined()
+                .stream()
+                .map(tournament -> UserTournamentDTO.builder()
+                        .tournamentId(tournament.getTournamentId())
+                        .tournamentName(tournament.getTournamentName())
+                        .tournamentCategory(tournament.getTournamentCategory())
+                        .tournamentCreated(tournament.getTournamentCreated())
+                        .tournamentExpiry(tournament.getTournamentExpiry())
+                        .tournamentPrize(tournament.getTournamentPrize())
+                        .totalJoined(tournament.getTotalJoined())
+                        .organizerName(tournament.getOrganizerName())
+                        .gameName(tournament.getGameName())
+                        .description(tournament.getDescription())
+                        .expired(tournament.getExpired())
+                        .build())
+                .toList();
     }
 
     private Tournament toEntity(TournamentRequestDTO dto) {

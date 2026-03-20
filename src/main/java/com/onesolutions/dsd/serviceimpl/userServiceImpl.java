@@ -57,6 +57,11 @@ public class userServiceImpl implements userService {
             throw new RuntimeException("Account already registered with this email");
         }
 
+        if (profileRepo.findByGamerName(userRequest.getGamername()).isPresent()) {
+            log.warn("Registration failed: Gamer name already exists - {}", userRequest.getGamername());
+            throw new RuntimeException("Gamer name already taken. Please choose a different gamer name.");
+        }
+
         UserEntity newprofile = toEntity(userRequest);
         newprofile.setPassword(passwordEncoder.encode(newprofile.getPassword()));
 

@@ -18,6 +18,7 @@ public enum GameCategory {
     HOSTAGE,
     WINGMAN,
 
+
     // Tournament Format
     SINGLE_ELIMINATION,
     DOUBLE_ELIMINATION,

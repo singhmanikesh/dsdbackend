@@ -10,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -52,6 +54,9 @@ public class UserEntity {
 
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
+
+    @ManyToMany(mappedBy = "usersJoined")
+    private List<Tournament> tournamentsJoined = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

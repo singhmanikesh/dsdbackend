@@ -49,7 +49,7 @@ public class Tournament {
     private String description;
 
     @Builder.Default
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "tournament_users",
             joinColumns = @JoinColumn(name = "tournament_id"),

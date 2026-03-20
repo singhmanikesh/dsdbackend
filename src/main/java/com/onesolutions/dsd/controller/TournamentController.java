@@ -3,6 +3,10 @@ package com.onesolutions.dsd.controller;
 import com.onesolutions.dsd.dto.*;
 import com.onesolutions.dsd.service.TournamentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +46,17 @@ public class TournamentController {
         return tournamentService.getAllTournaments();
     }
 
+    @GetMapping("/paginated")
+    public ResponseEntity<PaginatedTournamentResponseDTO> getAllTournamentsPaginated(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PaginatedTournamentResponseDTO response = tournamentService.getAllTournamentsPaginated(pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("/{id:\\d+}")
     public TournamentResponseDTO getTournamentById(@PathVariable Long id) {
 
@@ -64,12 +79,18 @@ public class TournamentController {
 
 
     @PostMapping("/{id:\\d+}/join")
-    public String joinTournament(
+    public ResponseEntity<JoinTournamentResponseDTO> joinTournament(
             @PathVariable Long id,
             @RequestBody JoinTournamentRequestDTO request) {
 
-        tournamentService.joinTournament(id, request.getUserId());
+        JoinTournamentResponseDTO response = tournamentService.joinTournamentWithResponse(id, request.getUserId());
 
-        return "User joined tournament successfully";
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/user/{userId:\\d+}")
+    public List<UserTournamentDTO> getUserTournaments(@PathVariable Long userId) {
+
+        return tournamentService.getUserTournaments(userId);
     }
 }

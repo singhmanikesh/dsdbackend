@@ -2,7 +2,7 @@ package com.onesolutions.dsd.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.onesolutions.dsd.enums.GameCategory;
+import com.onesolutions.dsd.entity.GameCategory;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -48,7 +48,7 @@ public class Tournament {
     private String description;
 
     @Builder.Default
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "tournament_users",
             joinColumns = @JoinColumn(name = "tournament_id"),

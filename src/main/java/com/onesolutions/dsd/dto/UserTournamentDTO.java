@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class TournamentResponseDTO {
+public class UserTournamentDTO {
 
     private Long tournamentId;
 
@@ -30,4 +30,7 @@ public class TournamentResponseDTO {
 
     private String description;
 
+    private Boolean expired;
+
 }
+

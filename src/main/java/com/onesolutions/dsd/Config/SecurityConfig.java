@@ -37,8 +37,7 @@ public class SecurityConfig {
         httpSecurity.cors(Customizer.withDefaults())   // if not able preflight will be blocked
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/status","/health","/activate","/register","/login","/refresh","/forget-password","/verify-otp","/reset-password").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())  // Permit all endpoints for now
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();

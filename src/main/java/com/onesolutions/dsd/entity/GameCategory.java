@@ -1,4 +1,4 @@
-package com.onesolutions.dsd.enums;
+package com.onesolutions.dsd.entity;
 
 public enum GameCategory {
 
@@ -13,6 +13,7 @@ public enum GameCategory {
     MODE_5V5,
     HOSTAGE,
     WINGMAN,
+
 
     // Tournament Format
     SINGLE_ELIMINATION,

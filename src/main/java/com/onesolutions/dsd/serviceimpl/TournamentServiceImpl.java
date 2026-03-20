@@ -13,6 +13,7 @@ import com.onesolutions.dsd.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,6 +65,22 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     public void createTeam(CreateTeamRequestDTO request) {
 
+        Tournament tournament = tournamentRepository.findById(request.getTournamentId())
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        if (tournament.getExpired()) {
+            throw new RuntimeException("Tournament already expired");
+        }
+
+        if (request.getGamerNames() == null || request.getGamerNames().isEmpty()) {
+            throw new RuntimeException("At least one gamer is required");
+        }
+
+        LinkedHashSet<String> uniqueGamerNames = new LinkedHashSet<>(request.getGamerNames());
+        if (request.getTeamLeaderGamerName() != null && !request.getTeamLeaderGamerName().isBlank()) {
+            uniqueGamerNames.add(request.getTeamLeaderGamerName());
+        }
+
         Team team = Team.builder()
                 .teamName(request.getTeamName())
                 .tournamentId(request.getTournamentId())
@@ -72,7 +89,7 @@ public class TournamentServiceImpl implements TournamentService {
 
         teamRepository.save(team);
 
-        for(String gamerName : request.getGamerNames()){
+        for (String gamerName : uniqueGamerNames) {
 
             UserEntity user = profileRepo.findByGamerName(gamerName)
                     .orElseThrow(() -> new RuntimeException("User not found: " + gamerName));
@@ -83,7 +100,17 @@ public class TournamentServiceImpl implements TournamentService {
                     .build();
 
             teamMemberRepository.save(member);
+
+            boolean alreadyJoined = tournament.getUsersJoined().stream()
+                    .anyMatch(joinedUser -> joinedUser.getId().equals(user.getId()));
+
+            if (!alreadyJoined) {
+                tournament.getUsersJoined().add(user);
+                tournament.setTotalJoined(tournament.getTotalJoined() + 1);
+            }
         }
+
+        tournamentRepository.save(tournament);
     }
 
 
@@ -101,8 +128,10 @@ public class TournamentServiceImpl implements TournamentService {
             throw new RuntimeException("Tournament already expired");
         }
 
-        // Check duplicate join
-        if (tournament.getUsersJoined().contains(user)) {
+        // Check duplicate join by id to avoid equals/hashCode dependency.
+        boolean alreadyJoined = tournament.getUsersJoined().stream()
+                .anyMatch(joinedUser -> joinedUser.getId().equals(user.getId()));
+        if (alreadyJoined) {
             throw new RuntimeException("User already joined");
         }
 

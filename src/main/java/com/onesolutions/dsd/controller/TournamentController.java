@@ -29,7 +29,7 @@ public class TournamentController {
         return "Team created successfully";
     }
 
-    @GetMapping("/{id}/teams")
+    @GetMapping("/{id:\\d+}/teams")
     public List<TeamResponseDTO> getTeamsByTournament(@PathVariable Long id){
 
         return tournamentService.getTeamsByTournament(id);
@@ -42,13 +42,13 @@ public class TournamentController {
         return tournamentService.getAllTournaments();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public TournamentResponseDTO getTournamentById(@PathVariable Long id) {
 
         return tournamentService.getTournamentById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public String deleteTournament(@PathVariable Long id) {
 
         tournamentService.deleteTournament(id);
@@ -56,14 +56,14 @@ public class TournamentController {
         return "Tournament deleted successfully";
     }
 
-    @GetMapping("/{id}/users")
+    @GetMapping("/{id:\\d+}/users")
     public List<UserJoinedResponseDTO> getJoinedUsers(@PathVariable Long id) {
 
         return tournamentService.getJoinedUsers(id);
     }
 
 
-    @PostMapping("/{id}/join")
+    @PostMapping("/{id:\\d+}/join")
     public String joinTournament(
             @PathVariable Long id,
             @RequestBody JoinTournamentRequestDTO request) {

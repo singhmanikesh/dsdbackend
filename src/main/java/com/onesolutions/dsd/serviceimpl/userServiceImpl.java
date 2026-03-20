@@ -245,13 +245,18 @@ public class userServiceImpl implements userService {
                 throw new RuntimeException("Only admin/owner accounts can login from this endpoint");
             }
 
+            boolean isAdmin = user.getRoles() == Roles.ADMIN;
+            boolean isOwner = user.getRoles() == Roles.OWNER;
+
             String accesstoken = jwtutil.generateAccessToken(authdto.getEmail());
             String refreshtoken = jwtutil.generateRefreshToken(authdto.getEmail());
 
             return Map.of(
                     "accesstoken", accesstoken,
                     "refreshtoken", refreshtoken,
-                    "user", getpublicProfile(authdto.getEmail())
+                    "user", getpublicProfile(authdto.getEmail()),
+                    "isAdmin", isAdmin,
+                    "isOwner", isOwner
             );
         } catch (Exception e) {
             log.error("Admin authentication failed for email: {}", authdto.getEmail(), e);

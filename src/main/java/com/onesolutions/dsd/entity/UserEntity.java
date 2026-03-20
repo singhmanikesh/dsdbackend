@@ -25,6 +25,7 @@ public class UserEntity {
     @Column(unique = true)
     private String email;
     private String password;
+    @Column(unique = true)
     private String gamerName;
     private String steamid;
     private String riotid;

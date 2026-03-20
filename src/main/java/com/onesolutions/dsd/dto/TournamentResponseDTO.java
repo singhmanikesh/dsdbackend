@@ -1,6 +1,6 @@
 package com.onesolutions.dsd.dto;
 
-import com.onesolutions.dsd.enums.GameCategory;
+import com.onesolutions.dsd.entity.GameCategory;
 import lombok.Builder;
 import lombok.Data;
 

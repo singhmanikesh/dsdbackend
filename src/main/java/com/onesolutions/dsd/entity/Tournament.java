@@ -2,7 +2,7 @@ package com.onesolutions.dsd.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.onesolutions.dsd.enums.GameCategory;
+import com.onesolutions.dsd.entity.GameCategory;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -25,6 +25,7 @@ public class Tournament {
     private String tournamentName;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private GameCategory tournamentCategory;
 
     @CreationTimestamp

@@ -1,9 +1,11 @@
 package com.onesolutions.dsd.serviceimpl;
 
 import com.onesolutions.dsd.Utility.Jwtutil;
+import com.onesolutions.dsd.dto.AdminRegisterRequestDTO;
 import com.onesolutions.dsd.dto.AuthDto;
 import com.onesolutions.dsd.dto.UserRequestDTO;
 import com.onesolutions.dsd.dto.UserResponseDTO;
+import com.onesolutions.dsd.entity.Roles;
 import com.onesolutions.dsd.entity.UserEntity;
 import com.onesolutions.dsd.repository.profileRepo;
 import com.onesolutions.dsd.service.EmailService;
@@ -25,6 +27,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -105,14 +108,57 @@ public class userServiceImpl implements userService {
     }
 
     @Override
+    public UserResponseDTO registerAdmin(AdminRegisterRequestDTO adminRequest) {
+        log.info("Starting admin registration for email: {}", adminRequest.getEmail());
+
+        if (profileRepo.findByEmail(adminRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("Account already registered with this email");
+        }
+
+        boolean isAdmin = Boolean.TRUE.equals(adminRequest.getIsAdmin());
+        boolean isOwner = Boolean.TRUE.equals(adminRequest.getIsOwner());
+
+        if (!isAdmin && !isOwner) {
+            throw new RuntimeException("At least one of isAdmin or isOwner must be true");
+        }
+
+        UserEntity adminUser = new UserEntity();
+        adminUser.setEmail(adminRequest.getEmail());
+        adminUser.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
+        adminUser.setGamerName(adminRequest.getGamername());
+        adminUser.setRoles(isOwner ? Roles.OWNER : Roles.ADMIN);
+
+        adminUser = profileRepo.save(adminUser);
+
+        emailService.sendTemplateEmail(
+                adminUser.getEmail(),
+                "Welcome to DSD",
+                "registration-mail",
+                Map.of("body", "Your account has been created successfully! Your gamer name is: " + adminUser.getGamerName())
+        );
+
+        return toDto(adminUser);
+    }
+
+    @Override
     public void addHp(Long userId, Integer hp) {
 
         UserEntity user = profileRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setHp(user.getHp() + hp);
+        // PATCH now updates HP to the provided value instead of incrementing it.
+        user.setHp(hp);
 
         profileRepo.save(user);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        return profileRepo.findAll()
+                .stream()
+                    .filter(user -> user.getRoles() != Roles.ADMIN && user.getRoles() != Roles.OWNER)
+                .map(this::toDto)
+                .toList();
     }
 
     public UserEntity toEntity(UserRequestDTO userRequest) {
@@ -184,6 +230,32 @@ public class userServiceImpl implements userService {
             log.error("Authentication failed for email: {}", authdto.getEmail(), e);
 
             throw new RuntimeException("Invalid email or Password");
+        }
+    }
+
+    @Override
+    public Map<String, Object> authenticateAdminAndgenerateToken(AuthDto authdto) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authdto.getEmail(), authdto.getPassword()));
+
+            UserEntity user = profileRepo.findByEmail(authdto.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Account not found"));
+
+            if (user.getRoles() != Roles.ADMIN && user.getRoles() != Roles.OWNER) {
+                throw new RuntimeException("Only admin/owner accounts can login from this endpoint");
+            }
+
+            String accesstoken = jwtutil.generateAccessToken(authdto.getEmail());
+            String refreshtoken = jwtutil.generateRefreshToken(authdto.getEmail());
+
+            return Map.of(
+                    "accesstoken", accesstoken,
+                    "refreshtoken", refreshtoken,
+                    "user", getpublicProfile(authdto.getEmail())
+            );
+        } catch (Exception e) {
+            log.error("Admin authentication failed for email: {}", authdto.getEmail(), e);
+            throw new RuntimeException("Invalid credentials or insufficient permissions");
         }
     }
 

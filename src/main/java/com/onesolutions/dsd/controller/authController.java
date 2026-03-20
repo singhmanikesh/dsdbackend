@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,6 +29,11 @@ public class authController {
     @GetMapping("/hello")
     public String hello() {
         return "Hello World!";
+    }
+
+    @GetMapping("/users")
+    public List<UserResponseDTO> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @PostMapping("/register")
@@ -51,6 +57,20 @@ public class authController {
         }
     }
 
+    @PostMapping("/admin/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> registerAdmin(@RequestBody AdminRegisterRequestDTO adminRequest) {
+        try {
+            userService.registerAdmin(adminRequest);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Admin registered successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PatchMapping("/users/{id}/hp")
     public String addHpToUser(
             @PathVariable Long id,
@@ -58,7 +78,7 @@ public class authController {
 
         userService.addHp(id, request.getHp());
 
-        return "HP added successfully";
+        return "HP updated successfully";
     }
 
     @PostMapping("/login")
@@ -76,6 +96,23 @@ public class authController {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid email or password"));
+        }
+    }
+
+    @PostMapping("/admin/login")
+    public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody AuthDto userRequest) {
+
+        try {
+
+            Map<String, Object> response =
+                    userService.authenticateAdminAndgenerateToken(userRequest);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 

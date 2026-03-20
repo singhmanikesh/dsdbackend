@@ -1,4 +1,4 @@
-package com.onesolutions.dsd.enums;
+package com.onesolutions.dsd.entity;
 
 public enum GameCategory {
 
@@ -6,6 +6,10 @@ public enum GameCategory {
     VALORANT,
     DOTA2,
     CSGO,
+    PUBG,
+    
+
+
 
     // Game Modes
     AIM_1V1,

@@ -34,8 +34,23 @@ public class UserEntity {
     private LocalDateTime updatedAt;
     private String avatarUrl;
     @Enumerated(EnumType.STRING)
-    private Roles roles;
+    private Roles roles = Roles.USER;
     private Integer hp;
+    // Fields for password reset
+    @Column(name = "reset_otp")
+    private String resetOtp;
+
+    @Column(name = "otp_expiry")
+    private LocalDateTime otpExpiry;
+
+    @Column(name = "otp_verified")
+    private Boolean otpVerified = false;
+
+    @Column(name = "reset_token" , unique = true)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
 
     @PrePersist
     public void prePersist() {
@@ -43,5 +58,7 @@ public class UserEntity {
             hp = 0; // Default HP value
         }
     }
+
+
 
 }

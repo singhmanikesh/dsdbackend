@@ -1,16 +1,15 @@
 package com.onesolutions.dsd.serviceimpl;
 
 import com.onesolutions.dsd.service.EmailService;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import jakarta.mail.internet.MimeMessage;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,19 +18,19 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Override
-    public void sendEmail(String to, String subject, String body) {
 
+    @Override
+    public void sendTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables) {
         try {
 
-            String fromEmail = "manikesh.amcec@gmail.com";
+            String fromEmail = "riteshkusingh27@gmail.com";
 
             // Create Thymeleaf context
             Context context = new Context();
-            context.setVariable("body", body);
+            context.setVariables(variables);
 
             // Process the HTML template
-            String htmlContent = templateEngine.process("registration-mail", context);
+            String htmlContent = templateEngine.process(templateName, context);
 
             // Create MimeMessage
             MimeMessage message = mailSender.createMimeMessage();

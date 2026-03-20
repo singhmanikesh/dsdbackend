@@ -1,6 +1,7 @@
 package com.onesolutions.dsd.service;
 
-public interface EmailService {
+import java.util.Map;
 
-    public void sendEmail(String to , String subject , String body);
+public interface EmailService {
+    void sendTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables);
 }

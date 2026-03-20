@@ -1,37 +1,113 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Email Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSD Gaming - Registration Successful</title>
 </head>
 
-<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+<body style="margin:0; padding:0; background-color:#0b0b0f; font-family:Arial, sans-serif;">
 
-<div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:10px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0b0b0f;">
+    <tr>
+        <td align="center" style="padding:20px 10px;">
 
-    <h2 style="color:#333;">Spring Boot Email Test 👋</h2>
 
-    <p>
-        This email was sent using:
-    </p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                   style="max-width:600px; background:#ffffff; border-radius:12px; overflow:hidden;">
 
-    <ul>
-        <li>Spring Boot</li>
-        <li>JavaMailSender</li>
-        <li>Thymeleaf Template</li>
-    </ul>
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background:#000000; padding:30px 20px;">
 
-    <p style="font-size:16px; margin-top:20px;">
-        <strong th:text="${body}">Email message here</strong>
-    </p>
+                        <!-- 🔥 BIGGER LOGO -->
+                        <img src="https://res.cloudinary.com/dqkn02x53/image/upload/v1773913597/with_slogan_and_red_600x-8_yegz96.png"
+                             alt="DSD Gaming"
+                             style="display:block; height:90px; max-width:100%; margin:0 auto 12px auto;">
 
-    <hr>
+                        <p style="margin:5px 0 0 0; color:#ff3c00; font-size:13px; letter-spacing:1px;">
+                            PREMIUM GAMING EXPERIENCE
+                        </p>
 
-    <p style="font-size:12px;color:gray;">
-        Spring Boot HTML Email
-    </p>
+                    </td>
+                </tr>
 
-</div>
+                <!-- Hero -->
+                <tr>
+                    <td align="center" style="background:#111111; padding:30px 20px;">
+
+                        <h1 style="margin:0; color:#ffffff; font-size:24px;">
+                            🎮 Welcome to DSD Gaming
+                        </h1>
+
+                        <p style="margin-top:10px; color:#bbbbbb; font-size:14px;">
+                            Experience Gaming at the Next Level
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding:25px 20px; color:#333333;">
+
+                        <h2 style="margin:0 0 10px 0; font-size:20px; color:#111;">
+                            🔥 Registration Successful
+                        </h2>
+
+                        <p style="font-size:14px; line-height:1.6; margin:10px 0;">
+                            Welcome to <strong>DSD Premium Gaming</strong>! Your account has been successfully created.
+                        </p>
+
+                        <p style="font-size:14px; line-height:1.6; margin:10px 0;">
+                            Get ready to compete in tournaments, earn rewards, and dominate the leaderboard.
+                        </p>
+
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                               style="margin:20px 0; background:#fff5f2; border-left:4px solid #ff3c00;">
+                            <tr>
+                                <td style="padding:15px;">
+                                    <strong th:text="${body}" style="font-size:14px; color:#111;">
+                                        Email message here
+                                    </strong>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table align="center" cellpadding="0" cellspacing="0" border="0" style="margin:25px auto;">
+                            <tr>
+                                <td align="center" bgcolor="#ff3c00" style="border-radius:6px;">
+                                    <a href="https://www.dsdpremiumgaming.com"
+                                       style="display:inline-block; padding:12px 26px; font-size:14px; color:#ffffff; text-decoration:none; font-weight:bold;">
+                                        Start Gaming 🚀
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="font-size:12px; color:#555; text-align:center; margin-top:20px;">
+                            If you did not create this account, please ignore this email.
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="background:#f4f4f4; padding:15px;">
+                        <p style="margin:0; font-size:12px; color:#666;">
+                            © 2026 DSD Premium Gaming. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+            ```
+
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/admin/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/tournaments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tournaments/user/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tournaments/paginated/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/contact").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
@@ -64,7 +66,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:8080","http://localhost:5173")); // Use your frontend's actual origin
+        config.setAllowedOriginPatterns(List.of("http://localhost:8080","http://localhost:5173","http://localhost:5174")); // Use your frontend's actual origin
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

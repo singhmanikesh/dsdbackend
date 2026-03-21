@@ -294,8 +294,8 @@ public class userServiceImpl implements userService {
 
         profileRepo.save(user);
 
-        // send email
-        emailService.sendTemplateEmail(
+        // send email synchronously (blocks until sent)
+        emailService.sendTemplateEmailSync(
                 user.getEmail(),
                 "Password Reset OTP",
                 "forgot-password-otp-mail",

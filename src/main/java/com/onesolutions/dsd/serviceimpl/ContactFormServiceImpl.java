@@ -21,14 +21,14 @@ public class ContactFormServiceImpl implements ContactFormService {
     public void sendContactForm(ContactFormDTO contactFormDTO) {
         try {
             log.info("Contact form submission received from: {} ({})", contactFormDTO.getName(), contactFormDTO.getEmail());
-            
+
             // Recipient email
             String recipientEmail = "offsecmanikesh@gmail.com";
-            
-            log.debug("Contact form details - Name: {}, Email: {}, Topic: {}, Consent: {}", 
-                    contactFormDTO.getName(), 
-                    contactFormDTO.getEmail(), 
-                    contactFormDTO.getTopic(), 
+
+            log.debug("Contact form details - Name: {}, Email: {}, Topic: {}, Consent: {}",
+                    contactFormDTO.getName(),
+                    contactFormDTO.getEmail(),
+                    contactFormDTO.getTopic(),
                     contactFormDTO.getConsent());
 
             // Prepare template variables
@@ -48,11 +48,11 @@ public class ContactFormServiceImpl implements ContactFormService {
                     "contact-form-mail",
                     variables
             );
-            
+
             log.info("Contact form email sent successfully to: {} with subject: {}", recipientEmail, contactFormDTO.getTopic());
-            
+
         } catch (Exception e) {
-            log.error("Error sending contact form email from: {} - Error: {}", 
+            log.error("Error sending contact form email from: {} - Error: {}",
                     contactFormDTO.getEmail(), e.getMessage(), e);
             throw e;
         }

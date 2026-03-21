@@ -42,6 +42,8 @@ public class Tournament {
 
     private String gameName;
 
+    private Integer hpReward;  // HP points rewarded for creating this tournament (set by admin)
+
     @Builder.Default
     private Boolean expired = false;
 

@@ -22,4 +22,6 @@ public class TournamentRequestDTO {
 
     private String description;
 
+    private Integer hpReward;  // Admin sets the HP reward for tournament creation
+
 }

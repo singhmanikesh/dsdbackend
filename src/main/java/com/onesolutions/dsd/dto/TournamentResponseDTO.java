@@ -30,4 +30,6 @@ public class TournamentResponseDTO {
 
     private String description;
 
+    private Integer hpReward;  // HP points rewarded for creating this tournament
+
 }

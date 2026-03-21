@@ -7,6 +7,7 @@ import com.onesolutions.dsd.serviceimpl.AppUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,7 +38,16 @@ public class SecurityConfig {
         httpSecurity.cors(Customizer.withDefaults())   // if not able preflight will be blocked
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Permit all endpoints for now
+                        // Allow unauthenticated access to register, login, and view all tournaments
+                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tournaments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/contact").permitAll()
+                        // All other endpoints require authentication
+                        .anyRequest().authenticated()
                         )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

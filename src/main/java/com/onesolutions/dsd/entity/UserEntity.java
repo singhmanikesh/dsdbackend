@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@ToString(exclude = "tournamentsJoined")  // Exclude lazy-loaded collection to avoid LazyInitializationException
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

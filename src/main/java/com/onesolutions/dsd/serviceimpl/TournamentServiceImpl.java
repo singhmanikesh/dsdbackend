@@ -18,6 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +41,25 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     public TournamentResponseDTO createTournament(TournamentRequestDTO request) {
 
+        // Get current authenticated user (tournament creator)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new RuntimeException("User is not authenticated");
+        }
+
+        UserEntity creator = profileRepo.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Create and save tournament
         Tournament tournament = toEntity(request);
         tournament = tournamentRepository.save(tournament);
+
+        // Add HP to the tournament creator using admin-configured reward (default: 10 if not specified)
+        int hpReward = request.getHpReward() != null && request.getHpReward() > 0 
+            ? request.getHpReward() 
+            : 10;
+        creator.setHp(creator.getHp() + hpReward);
+        profileRepo.save(creator);
 
         return toDto(tournament);
     }
@@ -309,6 +330,7 @@ public class TournamentServiceImpl implements TournamentService {
                 .organizerName(dto.getOrganizerName())
                 .gameName(dto.getGameName())
                 .description(dto.getDescription())
+                .hpReward(dto.getHpReward() != null ? dto.getHpReward() : 10)  // Default to 10 if not specified
                 .build();
     }
 
@@ -325,6 +347,7 @@ public class TournamentServiceImpl implements TournamentService {
                 .organizerName(tournament.getOrganizerName())
                 .gameName(tournament.getGameName())
                 .description(tournament.getDescription())
+                .hpReward(tournament.getHpReward())
                 .build();
     }
 }

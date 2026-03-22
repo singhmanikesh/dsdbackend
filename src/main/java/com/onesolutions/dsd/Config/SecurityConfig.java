@@ -38,17 +38,10 @@ public class SecurityConfig {
         httpSecurity.cors(Customizer.withDefaults())   // if not able preflight will be blocked
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Allow unauthenticated access to register, login, and view all tournaments
-                        .requestMatchers(HttpMethod.POST, "/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/admin/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/admin/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/tournaments").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/tournaments/user/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/tournaments/paginated/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/contact").permitAll()
-                        // All other endpoints require authentication
+                        // PUBLIC ENDPOINTS - No Authentication Required
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // Allow CORS preflight
+                                .requestMatchers( "/**").permitAll()
+                                // All other endpoints require authentication
                         .anyRequest().authenticated()
                         )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -66,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://localhost:8080","http://localhost:5173","http://localhost:5174")); // Use your frontend's actual origin
+        config.setAllowedOriginPatterns(List.of("http://localhost:8080","http://localhost:5173","http://localhost:5174","http://187.127.133.215:8080","https://dsdpremiumgaming.com","https://www.dsdpremiumgaming.com")); // Use your frontend's actual origin
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

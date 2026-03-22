@@ -14,14 +14,13 @@ import com.onesolutions.dsd.repository.TournamentRepository;
 import com.onesolutions.dsd.repository.profileRepo;
 import com.onesolutions.dsd.service.TournamentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
@@ -287,12 +287,49 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     @Override
+    @Transactional
     public void deleteTournament(Long id) {
+        log.info("Starting tournament deletion process for tournament ID: {}", id);
 
         Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+                .orElseThrow(() -> {
+                    log.error("Tournament not found for ID: {}", id);
+                    return new RuntimeException("Tournament not found");
+                });
 
-        tournamentRepository.delete(tournament);
+        log.info("Found tournament to delete - Name: {}, Total users joined: {}", 
+                 tournament.getTournamentName(), tournament.getUsersJoined().size());
+
+        try {
+            // Clear all users from the tournament to avoid foreign key constraint violations
+            int usersToRemove = tournament.getUsersJoined().size();
+            log.debug("Clearing {} users from tournament", usersToRemove);
+            tournament.getUsersJoined().clear();
+            log.info("Successfully cleared all {} users from tournament {}", usersToRemove, id);
+            
+            // Delete teams and team members associated with this tournament
+            List<Team> teams = teamRepository.findByTournamentId(id);
+            log.debug("Found {} teams associated with tournament ID: {}", teams.size(), id);
+            
+            for (Team team : teams) {
+                int memberCount = teamRepository.findByTournamentId(id).size();
+                log.debug("Deleting team members for team ID: {} (Team name: {})", team.getTeamId(), team.getTeamName());
+                teamMemberRepository.deleteByTeamTeamId(team.getTeamId());
+                log.info("Deleted team members for team: {}", team.getTeamName());
+                
+                log.debug("Deleting team: {} (ID: {})", team.getTeamName(), team.getTeamId());
+                teamRepository.delete(team);
+                log.info("Successfully deleted team: {}", team.getTeamName());
+            }
+            
+            log.debug("Deleting tournament with ID: {} from database", id);
+            tournamentRepository.delete(tournament);
+            log.info("Successfully deleted tournament '{}' (ID: {})", tournament.getTournamentName(), id);
+            
+        } catch (Exception e) {
+            log.error("Error occurred while deleting tournament ID: {}. Error: {}", id, e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override

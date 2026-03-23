@@ -60,7 +60,7 @@ public class EmailServiceImpl implements EmailService {
      * Used by both async and sync methods
      */
     private void sendEmailInternal(String to, String subject, String templateName, Map<String, Object> variables) throws Exception {
-        String fromEmail = "riteshkusingh27@gmail.com";
+        String fromEmail = "adminhelpdsd@gmail.com";
 
         // Create Thymeleaf context
         Context context = new Context();

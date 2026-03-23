@@ -23,7 +23,7 @@ public class ContactFormServiceImpl implements ContactFormService {
             log.info("Contact form submission received from: {} ({})", contactFormDTO.getName(), contactFormDTO.getEmail());
 
             // Recipient email
-            String recipientEmail = "offsecmanikesh@gmail.com";
+            String recipientEmail = "adminhelpdsd@gmail.com";
 
             log.debug("Contact form details - Name: {}, Email: {}, Topic: {}, Consent: {}",
                     contactFormDTO.getName(),
